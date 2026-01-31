@@ -1,7 +1,7 @@
 # Nuclear Plant Cyber Security and Access Control
 
 ## Overview
-This document defines the cyber security framework for the Riverside Nuclear Facility's digital infrastructure, protecting critical control systems, operational technology (OT), and information technology (IT) networks from cyber threats.
+This document defines the cyber security framework for the Springfield Nuclear Facility's digital infrastructure, protecting critical control systems, operational technology (OT), and information technology (IT) networks from cyber threats.
 
 ## Network Architecture
 

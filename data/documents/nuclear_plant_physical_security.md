@@ -1,7 +1,7 @@
 # Nuclear Plant Physical Security Procedures
 
 ## Overview
-This document outlines the physical security measures and protocols for the Riverside Nuclear Facility, a fictional 1200 MW pressurized water reactor (PWR) installation. These procedures are designed to protect critical infrastructure, personnel, and surrounding communities.
+This document outlines the physical security measures and protocols for the Springfield Nuclear Facility, a fictional 1200 MW pressurized water reactor (PWR) installation. These procedures are designed to protect critical infrastructure, personnel, and surrounding communities.
 
 ## Security Perimeter Zones
 
