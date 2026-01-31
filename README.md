@@ -42,17 +42,6 @@ src/
 ├── examples/                   # Example scripts & demos
 │   └── examples.py
 │
-├── docs/                       # Documentation
-│   ├── README.md              # Full documentation
-│   ├── QUICKSTART.md          # Quick start guide
-│   ├── IMPLEMENTATION_SUMMARY.md
-│   └── PROJECT_STRUCTURE.md
-│
-├── scripts/                    # Utility & diagnostic scripts
-│   ├── diagnose.py
-│   ├── verify_system.py
-│   └── architecture.py
-│
 ├── data/                       # Data storage
 │   ├── chroma_db/             # Vector database storage
 │   └── documents/             # Place your documents here
@@ -107,30 +96,6 @@ python run_examples.py 1  # Documentation query
 python run_examples.py 2  # Incident analysis
 python run_examples.py 6  # System info
 ```
-
-### Run Scripts
-
-**System diagnostics:**
-```bash
-python scripts/diagnose.py
-```
-
-**Verify installation:**
-```bash
-python scripts/verify_system.py
-```
-
-**Show architecture:**
-```bash
-python scripts/architecture.py
-```
-
-## 📚 Documentation
-
-- **[Full Documentation](docs/README.md)** - Complete guide with all features
-- **[Quick Start Guide](docs/QUICKSTART.md)** - Get started in 5 minutes
-- **[Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md)** - Technical details
-- **[Project Structure](docs/PROJECT_STRUCTURE.md)** - Architecture overview
 
 ## 🎯 Key Features
 
