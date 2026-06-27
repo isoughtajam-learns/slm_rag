@@ -1,8 +1,16 @@
 """
 Configuration for the local RAG system.
 """
-
+import base64
+import gzip
+import re
+import zlib
+from collections import defaultdict
+from enum import IntEnum, StrEnum
 from pathlib import Path
+from typing import List, TypedDict
+
+from typing_extensions import LiteralString
 
 # Base paths
 BASE_DIR = Path(__file__).parent.parent  # Project root directory
@@ -18,17 +26,48 @@ CHROMA_DB_DIR.mkdir(exist_ok=True)
 # Ollama model configuration
 OLLAMA_BASE_URL = "http://localhost:11434"
 
+class ModelType(StrEnum):
+    REASONING = "reasoning"
+    INTENT = "intent"
+    EMBEDDING = "embedding"
+
+
+class Model(TypedDict):
+    name: str
+    type: ModelType
+    id: int
+
+
 # Intent classification model (sub-1B for routing)
-INTENT_MODEL = "all-minilm:latest"
+class IntentModel(StrEnum):
+    ALL_MINILM = "all-minilm:latest"
 
 # Reasoning and synthesis model (1-3B for constrained reasoning)
-REASONING_MODEL = "hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:F16"
+class ReasoningModel(StrEnum):
+    LFM2_5__1_2B = "hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:F16"
+    GEMMA2 = "gemma2:latest"
 
 # Embedding model for RAG
-EMBEDDING_MODEL = "all-minilm:latest"
+class EmbeddingModel(StrEnum):
+    ALL_MINILM = "all-minilm:latest"
+    SNOWFLAKE_ARCTIC = "snowflake-arctic-embed:latest"
+    NOMIC = "nomic-embed-text:latest"
+
+def configure_models() -> List[Model]:
+    models = defaultdict(list)
+    total = len(IntentModel) + len(ReasoningModel) + len(EmbeddingModel)
+    generator = iter(range(total))
+    for model_enum in (IntentModel, ReasoningModel, EmbeddingModel):
+        models[model_enum.__name__] += [{
+            "name": m.name,
+            "type": m.__class__.__name__,
+            "model_id": next(generator),
+        } for m in list(model_enum)]
+
+    return models
 
 # Retrieval configuration
-TOP_K_RESULTS = 5
+TOP_K_RESULTS = 10
 SIMILARITY_THRESHOLD = 1.5  # ChromaDB uses L2 distance; lower=more similar, typical range 0.5-2.0
 
 # Document chunking configuration
@@ -80,4 +119,11 @@ Context from relevant documents:
 User request: {query}
 
 Generate a structured response in JSON format with relevant fields based on the request."""
+
+def get_composite_model_id(model_names: List[str]) -> str:
+    modified = ["_"]
+    for model_name in model_names:
+        modified.append(re.sub(r"[^0-9a-zA-Z_-]+", "", model_name))
+    compressed = zlib.compress("_".join(modified).encode("utf-8"))
+    return base64.b64encode(compressed).decode('ascii')
 

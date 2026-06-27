@@ -6,13 +6,13 @@ Routes incoming requests to appropriate handlers.
 import ollama
 import numpy as np
 from typing import Dict, Optional
-from src.config import INTENT_MODEL, INTENT_CLASSIFICATION_PROMPT, INTENT_CATEGORIES, OLLAMA_BASE_URL
+from src.config import INTENT_CATEGORIES, OLLAMA_BASE_URL, IntentModel
 
 
 class IntentClassifier:
     """Classifies user queries into predefined intent categories using embedding similarity."""
     
-    def __init__(self, model_name: str = INTENT_MODEL):
+    def __init__(self, model_name: str = IntentModel.ALL_MINILM):
         """
         Initialize the intent classifier.
         

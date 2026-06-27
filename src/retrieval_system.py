@@ -8,13 +8,15 @@ from typing import List, Dict, Optional
 from pathlib import Path
 import json
 
+from src.config import EmbeddingModel
+
 # Monkey-patch ChromaDB telemetry to suppress errors
 try:
     from chromadb.telemetry.product.posthog import Posthog
     original_capture = Posthog.capture
     def silent_capture(self, *args, **kwargs):
         try:
-            return original_capture(self, *args, **kwargs)
+            return original_capture(self)
         except:
             pass
     Posthog.capture = silent_capture
@@ -28,7 +30,7 @@ from src.document_processor import DocumentProcessor, TextChunker, LocalEmbedder
 class LocalVectorStore:
     """Manages document storage and retrieval using ChromaDB."""
     
-    def __init__(self, collection_name: str = "enterprise_docs"):
+    def __init__(self, collection_name: str = "enterprise_docs", embedding_model_name: str = EmbeddingModel.ALL_MINILM):
         """
         Initialize the vector store.
         
@@ -52,7 +54,7 @@ class LocalVectorStore:
             metadata={"description": "Enterprise documents for RAG"}
         )
         
-        self.embedder = LocalEmbedder()
+        self.embedder = LocalEmbedder(model_name=embedding_model_name)
     
     def add_documents(self, documents: List[Dict[str, any]]) -> None:
         """
@@ -175,17 +177,17 @@ class LocalVectorStore:
 class RetrievalSystem:
     """High-level retrieval system with document processing pipeline."""
     
-    def __init__(self, collection_name: str = "enterprise_docs"):
+    def __init__(self, collection_name: str = "enterprise_docs", embedding_model_name: str = EmbeddingModel.ALL_MINILM):
         """
         Initialize the retrieval system.
         
         Args:
             collection_name: Name of the ChromaDB collection
         """
-        self.vector_store = LocalVectorStore(collection_name)
+        self.vector_store = LocalVectorStore(collection_name=collection_name, embedding_model_name=embedding_model_name)
         self.document_processor = DocumentProcessor()
         self.chunker = TextChunker(chunk_size=500, chunk_overlap=50)
-        self.embedder = LocalEmbedder()
+        self.embedder = LocalEmbedder(model_name=embedding_model_name)
     
     def ingest_documents(self, documents_dir: Path = None) -> int:
         """
@@ -198,7 +200,7 @@ class RetrievalSystem:
             Number of chunks ingested
         """
         if documents_dir is None:
-            from config import DOCUMENTS_DIR
+            from src.config import DOCUMENTS_DIR
             documents_dir = DOCUMENTS_DIR
         
         print(f"Loading documents from {documents_dir}")

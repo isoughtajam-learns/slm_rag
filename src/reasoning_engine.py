@@ -8,20 +8,20 @@ from typing import List, Dict, Optional
 import json
 
 from src.config import (
-    REASONING_MODEL,
     REASONING_PROMPT,
     STRUCTURED_OUTPUT_PROMPT,
     OLLAMA_BASE_URL,
     MAX_RESPONSE_TOKENS,
     CONTEXT_WINDOW,
-    REASONING_TEMPERATURE
+    REASONING_TEMPERATURE,
+    ReasoningModel,
 )
 
 
 class ReasoningEngine:
     """Performs reasoning and synthesis using a small language model."""
     
-    def __init__(self, model_name: str = REASONING_MODEL):
+    def __init__(self, model_name: str = ReasoningModel.LFM2_5__1_2B):
         """
         Initialize the reasoning engine.
         

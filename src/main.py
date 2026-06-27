@@ -4,17 +4,21 @@ Coordinates intent classification, retrieval, and reasoning.
 """
 
 import os
+import time
+
 # Disable ChromaDB telemetry before any imports
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
 os.environ["CHROMA_TELEMETRY_ENABLED"] = "False"
 
-from typing import Dict, Optional, List
+from typing import Dict, List
 from pathlib import Path
 
 from src.intent_classifier import IntentClassifier
 from src.retrieval_system import RetrievalSystem
 from src.reasoning_engine import ReasoningEngine
-from src.config import TOP_K_RESULTS
+from src.config import TOP_K_RESULTS, \
+    EmbeddingModel, IntentModel, \
+    ReasoningModel
 
 
 class LocalRAGSystem:
@@ -27,19 +31,30 @@ class LocalRAGSystem:
     3. Reasoning & Synthesis (1-3B SLM) - Generates responses
     """
     
-    def __init__(self, collection_name: str = "enterprise_docs"):
+    def __init__(
+            self,
+            collection_name: str = "docs",
+            intent_model_name: str = IntentModel.ALL_MINILM,
+            embedding_model_name: str = EmbeddingModel.ALL_MINILM,
+            reasoning_model_name: str = ReasoningModel.LFM2_5__1_2B,
+    ) -> None:
         """
         Initialize the RAG system.
         
         Args:
             collection_name: Name of the document collection
         """
-        print("Initializing Local RAG System...")
+        collection_name = collection_name + "_" + "-".join([
+            IntentModel(intent_model_name).name,
+            EmbeddingModel(embedding_model_name).name,
+            ReasoningModel(reasoning_model_name).name
+        ])
+        print(f"Initializing Local RAG System for {collection_name}")
         
         # Initialize components
-        self.intent_classifier = IntentClassifier()
-        self.retrieval_system = RetrievalSystem(collection_name)
-        self.reasoning_engine = ReasoningEngine()
+        self.intent_classifier = IntentClassifier(model_name=intent_model_name)
+        self.retrieval_system = RetrievalSystem(collection_name, embedding_model_name)
+        self.reasoning_engine = ReasoningEngine(model_name=reasoning_model_name)
         
         print("✓ System initialized")
     
@@ -53,6 +68,7 @@ class LocalRAGSystem:
         Returns:
             Number of chunks ingested
         """
+        start = time.time()
         print("\n" + "="*60)
         print("DOCUMENT INGESTION")
         print("="*60)
@@ -60,6 +76,7 @@ class LocalRAGSystem:
         count = self.retrieval_system.ingest_documents(documents_dir)
         
         stats = self.retrieval_system.get_stats()
+        print(f"Time taken to ingest: {time.time() - start} seconds")
         print(f"\n✓ Ingestion complete")
         print(f"  Total documents in system: {stats['document_count']}")
         
@@ -110,11 +127,13 @@ class LocalRAGSystem:
                 print(f"\n[2/3] Retrieving relevant documents...")
             
             retrieved_docs = self.retrieval_system.retrieve(user_query, n_results)
+            if not retrieved_docs:
+                raise Exception("No documents retrieved, embeddings need to be generated with chosen models")
             
             if verbose:
                 print(f"  Found {len(retrieved_docs)} relevant chunks")
-                if retrieved_docs:
-                    print(f"  Sources: {', '.join(set(d['metadata'].get('filename', 'Unknown') for d in retrieved_docs))}")
+            if retrieved_docs:
+                print(f"  Sources: {', '.join(set(d['metadata'].get('filename', 'Unknown') for d in retrieved_docs))}")
             
             # Show chunks if requested
             if show_chunks and retrieved_docs:

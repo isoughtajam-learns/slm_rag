@@ -8,11 +8,11 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import json
 from src.config import (
-    DOCUMENTS_DIR, 
-    EMBEDDING_MODEL, 
+    DOCUMENTS_DIR,
     OLLAMA_BASE_URL,
     CHUNK_SIZE,
-    CHUNK_OVERLAP
+    CHUNK_OVERLAP,
+    EmbeddingModel,
 )
 
 
@@ -216,7 +216,7 @@ class TextChunker:
 class LocalEmbedder:
     """Generates embeddings using local Ollama models."""
     
-    def __init__(self, model_name: str = EMBEDDING_MODEL):
+    def __init__(self, model_name: str = EmbeddingModel.ALL_MINILM):
         """
         Initialize the embedder.
         
